@@ -1,15 +1,16 @@
 from django.views.generic import TemplateView
-from django.http import HttpResponse
-
-
-
-def show_jarvis(request):
-    return HttpResponse("Jarvis is running")
+from django.shortcuts import render
+from .models import Product
 
 
 class AboutPageView(TemplateView):
     template_name = "about.html"
 
 
-class MensPageView(TemplateView):
-    template_name = "mens.html"
+def mens_page(request):
+    products = Product.objects.filter(is_active=True)
+    return render(request, 'mens.html', {'products': products})
+
+
+class WomensPageView(TemplateView):
+    template_name = "womens.html"
