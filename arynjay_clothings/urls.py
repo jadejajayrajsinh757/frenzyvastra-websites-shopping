@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import RedirectView
 
-from jarvis import views
+from arynjay_store import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('jarvis/', views.show_jarvis, name='show_jarvis'),
-    path('about/', views.AboutPageView.as_view(), name='about'),
+    path('', views.AboutPageView.as_view(), name='about'),
     path('mens/', views.MensPageView.as_view(), name='mens'),
 ]
