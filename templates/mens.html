@@ -193,7 +193,7 @@
     <div class="products-grid">
         {% for product in products %}
         <div class="card">
-            <img src="{{ product.product_img_url }}" alt="{{ product.product_title }}">
+            <img src="{{ product.product_img.url }}" alt="{{ product.product_title }}">
             <h3>{{ product.product_title }}</h3>
             <p>{{ product.product_description }}</p>
             <p class="price">Rs. {{ product.product_price }}</p>

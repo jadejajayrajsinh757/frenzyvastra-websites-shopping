@@ -9,4 +9,4 @@ class Product(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     available_qty = models.IntegerField()
-    product_img_url = models.URLField()
+    product_img = models.ImageField(upload_to='products/')
