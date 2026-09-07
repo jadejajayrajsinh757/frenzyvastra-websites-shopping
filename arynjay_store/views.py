@@ -1,8 +1,8 @@
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 from .models import Product
+from .forms import SignupForm, LoginForm
 
 
 class AboutPageView(TemplateView):
@@ -19,30 +19,31 @@ class WomensPageView(TemplateView):
 
 
 def login_page(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+    if request.user.is_authenticated:
+        return redirect('seller_dashboard')
+    form = LoginForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
             return redirect('about')
         else:
-            return render(request, 'login.html', {'error': 'Invalid username or password'})
-    return render(request, 'login.html')
+            form.add_error(None, 'Invalid username or password')
+    return render(request, 'login.html', {'form': form})
 
 
 def signup_page(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
-        if password != confirm_password:
-            return render(request, 'signup.html', {'error': 'Passwords do not match'})
-        if User.objects.filter(username=username).exists():
-            return render(request, 'signup.html', {'error': 'Username already taken'})
-        User.objects.create_user(username=username, password=password)
+    if request.user.is_authenticated:
+        return redirect('seller_dashboard')
+    form = SignupForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user = form.save(commit=False)
+        user.set_password(form.cleaned_data['password'])
+        user.save()
         return redirect('login')
-    return render(request, 'signup.html')
+    return render(request, 'signup.html', {'form': form})
 
 
 def logout_page(request):
@@ -51,10 +52,14 @@ def logout_page(request):
 
 
 def seller_dashboard(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     return render(request, 'seller_dashboard.html')
 
 
 def seller_add_product(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     if request.method == 'POST':
         product = Product()
         product.product_title = request.POST['product_title']
@@ -68,11 +73,15 @@ def seller_add_product(request):
 
 
 def seller_products(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     products = Product.objects.all()
     return render(request, 'seller_products.html', {'products': products})
 
 
 def seller_update_product(request, product_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     product = get_object_or_404(Product, product_id=product_id)
     if request.method == 'POST':
         product.product_title = request.POST['product_title']
